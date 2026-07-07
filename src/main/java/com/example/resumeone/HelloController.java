@@ -8,12 +8,21 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 public class HelloController {
     @FXML
    private Button btnNewProject;
 
     @FXML
     private VBox projectList;
+
+    @FXML
+    public void initialize() throws IOException {
+        captureRunningApps();
+    }
 
     @FXML
     private void onNewProjectClick(){
@@ -41,5 +50,18 @@ public class HelloController {
 
         });
 
+    }
+    public void captureRunningApps() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", "tasklist");
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+        );
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split("\\s+");
+            System.out.println(parts[0]);
+        }
     }
 }
