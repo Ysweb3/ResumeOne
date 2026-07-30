@@ -20,7 +20,7 @@ public class HelloApplication extends Application {
         stage.setTitle("Resume One");
 
         stage.setScene(scene);
-//        stage.show();
+        stage.show();
 
     }
 
