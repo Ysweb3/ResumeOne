@@ -1,9 +1,9 @@
 package com.example.resumeone;
 
+import com.google.gson.Gson;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextInputControl;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -11,10 +11,10 @@ import javafx.scene.layout.VBox;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
 
 public class HelloController {
     @FXML
@@ -22,6 +22,8 @@ public class HelloController {
 
     @FXML
     private VBox projectList;
+
+    private ArrayList<Project> projects = new ArrayList<>();
 
     @FXML
     public void initialize() throws IOException {
@@ -56,7 +58,8 @@ public class HelloController {
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                segregateApps(runningApps);
+                saveProject(segregateApps(runningApps));
+
             });
 
             Button deleteBtn = new Button();
@@ -88,11 +91,12 @@ public class HelloController {
         }
         return appset;
     }
-    public void  segregateApps(HashSet<String> appset){
+    public HashMap<String, HashSet<String>> segregateApps(HashSet<String> appset){
         //takes appset and categorizes it into results hashmap with hashset of item
         HashMap<String, String> knownApps = new HashMap();
         HashMap<String, HashSet<String>> result = new HashMap<>();
         knownApps.put("brave.exe","Browser");
+        knownApps.put("chrome.exe","Browser");
 
         result.put("IDE", new HashSet<>());
         result.put("Browser",new HashSet<>());
@@ -105,5 +109,16 @@ public class HelloController {
         for (String item : result.keySet()) {
             System.out.println(item + " -> " + result.get(item));
         }
+        return result;
+    }
+    public void saveProject(HashMap<String, HashSet<String>> result){
+        String objName = "TestName1";
+        ArrayList<String> objFolderPath = null;
+        ArrayList<String> objUrls = null;
+
+        Project projectObj = new Project(objName,objFolderPath,result,objUrls);
+        projects.add(projectObj);
+        System.out.println("YAy SAVED!!");
+
     }
 }
