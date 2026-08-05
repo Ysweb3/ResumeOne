@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class Project {
-    String projectName;
-    LocalDate lastCheckpoint;
-    boolean active;
-    ArrayList<String> folderPath;
-    HashMap<String, HashSet<String>> apps;
-    ArrayList<String> urls;
+    public String projectName;
+    public String lastCheckpoint;
+    public boolean active;
+    public ArrayList<String> folderPath;
+    public HashMap<String, HashSet<String>> apps;
+    public ArrayList<String> urls;
 
 
 public Project(String projectName,ArrayList<String> folderPath, HashMap<String, HashSet<String>> apps,ArrayList<String> urls){
         active = false;
-        lastCheckpoint = LocalDate.now();
+        lastCheckpoint = LocalDate.now().toString();
         this.projectName = projectName;
         this.folderPath = folderPath;
         this.apps = apps;
@@ -27,7 +27,7 @@ public Project(String projectName,ArrayList<String> folderPath, HashMap<String, 
 public String getProjectName() {
     return projectName;
 }
-public LocalDate getLocalDate(){
+public String getLocalDate(){
     return lastCheckpoint;
 }
 public boolean getActive(){

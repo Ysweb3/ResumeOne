@@ -8,9 +8,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,12 +16,12 @@ import java.util.HashSet;
 
 public class HelloController {
     @FXML
-   private Button btnNewProject;
+    public Button btnNewProject;
 
     @FXML
-    private VBox projectList;
+    public VBox projectList;
 
-    private ArrayList<Project> projects = new ArrayList<>();
+    public ArrayList<Project> projects = new ArrayList<>();
 
     @FXML
     public void initialize() throws IOException {
@@ -32,7 +30,7 @@ public class HelloController {
     }
 
     @FXML
-    private void onNewProjectClick(){
+    public void onNewProjectClick(){
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("New project");
         dialog.setHeaderText(null);
@@ -58,7 +56,11 @@ public class HelloController {
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                saveProject(segregateApps(runningApps));
+                try {
+                    saveProject(segregateApps(runningApps));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
 
             });
 
@@ -111,7 +113,8 @@ public class HelloController {
         }
         return result;
     }
-    public void saveProject(HashMap<String, HashSet<String>> result){
+    public void saveProject(HashMap<String, HashSet<String>> result) throws IOException {
+
         String objName = "TestName1";
         ArrayList<String> objFolderPath = null;
         ArrayList<String> objUrls = null;
@@ -120,5 +123,16 @@ public class HelloController {
         projects.add(projectObj);
         System.out.println("YAy SAVED!!");
 
+        String dirPath = System.getenv("APPDATA") + "\\ResumeWork";
+        new File(dirPath).mkdirs();
+        String filePath = dirPath + "\\projects.json";
+
+        Gson gson = new Gson();
+        String jsonObj = gson.toJson(projectObj);
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+        writer.write(jsonObj);
+        writer.close();
+        System.out.println("Written to: " + filePath);
     }
 }
