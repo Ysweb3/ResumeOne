@@ -40,7 +40,7 @@ public class HelloController {
             HBox projectRow = new HBox(10);
             Label projectLabel = new Label(name);
             projectLabel.setStyle("-fx-text-fill: white; -fx-padding: 8px;");
-
+            System.out.println(name);
 
             Button resumeBtn = new Button();
             resumeBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight:bold;");
@@ -57,7 +57,7 @@ public class HelloController {
                     throw new RuntimeException(ex);
                 }
                 try {
-                    saveProject(segregateApps(runningApps));
+                    saveProject(name,segregateApps(runningApps));
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -113,13 +113,12 @@ public class HelloController {
         }
         return result;
     }
-    public void saveProject(HashMap<String, HashSet<String>> result) throws IOException {
+    public void saveProject(String name, HashMap<String, HashSet<String>> result) throws IOException {
 
-        String objName = "TestName1";
         ArrayList<String> objFolderPath = null;
         ArrayList<String> objUrls = null;
 
-        Project projectObj = new Project(objName,objFolderPath,result,objUrls);
+        Project projectObj = new Project(name,objFolderPath,result,objUrls);
         projects.add(projectObj);
         System.out.println("YAy SAVED!!");
 
