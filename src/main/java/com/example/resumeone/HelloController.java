@@ -42,9 +42,20 @@ public class HelloController {
             projectLabel.setStyle("-fx-text-fill: white; -fx-padding: 8px;");
             System.out.println(name);
 
+
+
             Button resumeBtn = new Button();
             resumeBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight:bold;");
             resumeBtn.setText("Resume");
+
+            Project projectObj = new Project(name, new ArrayList<>(), new HashMap<>(), new ArrayList<>());
+            projects.add(projectObj);
+
+            resumeBtn.setUserData(projectObj);
+
+            resumeBtn.setOnAction(e ->{
+
+            });
 
             Button checkpointBtn = new Button();
             checkpointBtn.setStyle("-fx-background-color: #FFFFFF; -fx-text-fill: black; -fx-font-weight:bold;");
@@ -53,11 +64,14 @@ public class HelloController {
                 HashSet<String> runningApps = null;
                 try {
                     runningApps = captureRunningApps();
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
                 try {
-                    saveProject(name,segregateApps(runningApps));
+                    projectObj.apps = segregateApps(runningApps);
+                    saveProject(projectObj);
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -97,11 +111,37 @@ public class HelloController {
         //takes appset and categorizes it into results hashmap with hashset of item
         HashMap<String, String> knownApps = new HashMap();
         HashMap<String, HashSet<String>> result = new HashMap<>();
-        knownApps.put("brave.exe","Browser");
-        knownApps.put("chrome.exe","Browser");
+        knownApps.put("brave.exe", "Browser");
+        knownApps.put("chrome.exe", "Browser");
+        knownApps.put("firefox.exe", "Browser");
+        knownApps.put("msedge.exe", "Browser");
+
+        knownApps.put("code.exe", "IDE");
+        knownApps.put("idea64.exe", "IDE");
+        knownApps.put("devenv.exe", "IDE");
+        knownApps.put("eclipse.exe", "IDE");
+
+        knownApps.put("spotify.exe", "Music");
+        knownApps.put("amazonmusic.exe", "Music");
+
+        knownApps.put("discord.exe", "Communication");
+        knownApps.put("slack.exe", "Communication");
+        knownApps.put("teams.exe", "Communication");
+
+        knownApps.put("notion.exe", "Notes");
+        knownApps.put("obsidian.exe", "Notes");
+        knownApps.put("onenote.exe", "Notes");
+
+        knownApps.put("windowsterminal.exe", "Terminal");
+        knownApps.put("cmd.exe", "Terminal");
+        knownApps.put("powershell.exe", "Terminal");
 
         result.put("IDE", new HashSet<>());
         result.put("Browser",new HashSet<>());
+        result.put("Music",new HashSet<>());
+        result.put("Communication",new HashSet<>());
+        result.put("Notes",new HashSet<>());
+        result.put("Terminal",new HashSet<>());
 
         for (String item: knownApps.keySet()){
             if (appset.contains(item)){
@@ -113,14 +153,13 @@ public class HelloController {
         }
         return result;
     }
-    public void saveProject(String name, HashMap<String, HashSet<String>> result) throws IOException {
+    public void saveProject(Project projectObj) throws IOException {
 
         ArrayList<String> objFolderPath = null;
-        ArrayList<String> objUrls = null;
+        ArrayList<String> objUrls = new ArrayList<>();
 
-        Project projectObj = new Project(name,objFolderPath,result,objUrls);
         projects.add(projectObj);
-        System.out.println("YAy SAVED!!");
+        System.out.println(projectObj.urls);
 
         String dirPath = System.getenv("APPDATA") + "\\ResumeWork";
         new File(dirPath).mkdirs();
@@ -129,9 +168,11 @@ public class HelloController {
         Gson gson = new Gson();
         String jsonObj = gson.toJson(projectObj);
 
+        //TODO:adding multiple projects and fix the json formatting
         BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
         writer.write(jsonObj);
+        writer.newLine();
         writer.close();
-        System.out.println("Written to: " + filePath);
     }
+
 }
