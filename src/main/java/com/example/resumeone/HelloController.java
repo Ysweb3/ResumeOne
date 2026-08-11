@@ -12,6 +12,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 
 public class HelloController {
@@ -54,7 +55,13 @@ public class HelloController {
             resumeBtn.setUserData(projectObj);
 
             resumeBtn.setOnAction(e ->{
+                try {
 
+                    resumeProject(projectObj);
+
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             });
 
             Button checkpointBtn = new Button();
@@ -124,6 +131,8 @@ public class HelloController {
         knownApps.put("spotify.exe", "Music");
         knownApps.put("amazonmusic.exe", "Music");
 
+        knownApps.put("claude.exe", "AI");
+
         knownApps.put("discord.exe", "Communication");
         knownApps.put("slack.exe", "Communication");
         knownApps.put("teams.exe", "Communication");
@@ -132,9 +141,9 @@ public class HelloController {
         knownApps.put("obsidian.exe", "Notes");
         knownApps.put("onenote.exe", "Notes");
 
-        knownApps.put("windowsterminal.exe", "Terminal");
-        knownApps.put("cmd.exe", "Terminal");
-        knownApps.put("powershell.exe", "Terminal");
+//        knownApps.put("windowsterminal.exe", "Terminal");
+//        knownApps.put("cmd.exe", "Terminal");
+//        knownApps.put("powershell.exe", "Terminal");
 
         result.put("IDE", new HashSet<>());
         result.put("Browser",new HashSet<>());
@@ -142,6 +151,7 @@ public class HelloController {
         result.put("Communication",new HashSet<>());
         result.put("Notes",new HashSet<>());
         result.put("Terminal",new HashSet<>());
+        result.put("AI",new HashSet<>());
 
         for (String item: knownApps.keySet()){
             if (appset.contains(item)){
@@ -174,5 +184,22 @@ public class HelloController {
         writer.newLine();
         writer.close();
     }
-
-}
+    public String getAppPath(String appName) throws IOException {
+        ProcessBuilder pb = new  ProcessBuilder("cmd.exe","/c", "where", appName);
+        Process process = pb.start();
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream())
+        );
+        String path = reader.readLine();
+        return path != null ? path.trim() : null;
+    }
+    public void resumeProject(Project projectObj) throws IOException {
+        //TODO:add multiple apps checking for path list
+        System.out.println("projectName:"+projectObj.projectName);
+        for (String category: projectObj.apps.keySet()){
+            for (String app : projectObj.apps.get(category)){
+                new ProcessBuilder("cmd.exe", "/c", "start", app.replace(".exe", "")).start();
+                }
+            }
+        }
+    }
