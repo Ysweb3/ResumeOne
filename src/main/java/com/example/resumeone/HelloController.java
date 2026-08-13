@@ -2,17 +2,22 @@ package com.example.resumeone;
 
 import com.google.gson.Gson;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
+import java.io.File;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class HelloController {
@@ -21,6 +26,8 @@ public class HelloController {
 
     @FXML
     public VBox projectList;
+
+    public String projectFolder;
 
     public ArrayList<Project> projects = new ArrayList<>();
 
@@ -32,28 +39,66 @@ public class HelloController {
 
     @FXML
     public void onNewProjectClick(){
-        TextInputDialog dialog = new TextInputDialog();
+        Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("New project");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Project Name:");
 
-        dialog.showAndWait().ifPresent(name -> {
+       TextField nameField = new TextField();
+       TextField folderField = new TextField();
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.add(new Label("Project Name"),0,0);
+        grid.add(nameField,1,0);
+
+        Button selectFolder = new Button();
+        selectFolder.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight:bold;");
+        selectFolder.setText("Select Folder");
+        selectFolder.setOnAction(e -> {
+            projectFolder = (openFolder(e));
+//            System.out.println(projectFolder);
+                });
+
+        grid.add(selectFolder,1,1);
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+
+            String name = nameField.getText();
+
+
             HBox projectRow = new HBox(10);
             Label projectLabel = new Label(name);
             projectLabel.setStyle("-fx-text-fill: white; -fx-padding: 8px;");
-            System.out.println(name);
+            System.out.println("PROJECT NAME:"+name);
 
+            //empty project object
+            Project projectObj = new Project(name, projectFolder, new HashMap<>(), new ArrayList<>());
+            projects.add(projectObj);
+
+            //initial capture when new project is made
+            HashSet<String> currentapps = null;
+            try {
+                currentapps = captureRunningApps();
+
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                projectObj.apps = segregateApps(currentapps);
+                saveProject(projectObj);
+
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
 
 
             Button resumeBtn = new Button();
             resumeBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight:bold;");
             resumeBtn.setText("Resume");
-
-            Project projectObj = new Project(name, new ArrayList<>(), new HashMap<>(), new ArrayList<>());
-            projects.add(projectObj);
-
-            resumeBtn.setUserData(projectObj);
-
             resumeBtn.setOnAction(e ->{
                 try {
 
@@ -69,6 +114,7 @@ public class HelloController {
             checkpointBtn.setText("Add Checkpoint");
             checkpointBtn.setOnAction(e -> {
                 HashSet<String> runningApps = null;
+
                 try {
                     runningApps = captureRunningApps();
 
@@ -92,7 +138,7 @@ public class HelloController {
             projectRow.getChildren().addAll(projectLabel,resumeBtn,deleteBtn,checkpointBtn);
             projectList.getChildren().add(projectRow);
 
-        });
+        };
 
     }
     //IDEA:Also add a CLI to start this thing
@@ -195,6 +241,7 @@ public class HelloController {
     }
     public void resumeProject(Project projectObj) throws IOException {
         //TODO:add multiple apps checking for path list
+        //DO THIS TODO:open claude cli in the correct folder store the original project folder somewhere
         System.out.println("projectName:"+projectObj.projectName);
         for (String category: projectObj.apps.keySet()){
             for (String app : projectObj.apps.get(category)){
@@ -202,4 +249,24 @@ public class HelloController {
                 }
             }
         }
+    public String openFolder(ActionEvent event) {
+        // 1. Create the DirectoryChooser
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select Application Folder");
+
+        // 2. Get the current Window reference from the action event
+        Window ownerWindow = ((Node) event.getSource()).getScene().getWindow();
+
+        // 3. Show the dialog attached to your application window
+        File selectedDirectory = directoryChooser.showDialog(ownerWindow);
+
+        // 4. Process the selected folder
+        if (selectedDirectory != null) {
+           return selectedDirectory.getAbsolutePath() ;
+        } else {
+            System.out.println("No folder chosen.");
+        }
+        return "NULL";
     }
+
+}

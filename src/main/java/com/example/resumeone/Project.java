@@ -11,12 +11,12 @@ public class Project {
     public String projectName;
     public String lastCheckpoint;
     public boolean active;
-    public ArrayList<String> folderPath;
+    public String folderPath;
     public HashMap<String, HashSet<String>> apps;
     public ArrayList<String> urls;
 
 
-public Project(String projectName,ArrayList<String> folderPath, HashMap<String, HashSet<String>> apps,ArrayList<String> urls){
+public Project(String projectName,String folderPath, HashMap<String, HashSet<String>> apps,ArrayList<String> urls){
         active = false;
         lastCheckpoint = LocalDate.now().toString();
         this.projectName = projectName;
@@ -34,7 +34,7 @@ public boolean getActive(){
     return active;
 }
 
-public ArrayList<String> getFolderPath() {
+public String getFolderPath() {
     return folderPath;
 }
 
