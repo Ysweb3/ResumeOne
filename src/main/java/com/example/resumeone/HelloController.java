@@ -1,6 +1,7 @@
 package com.example.resumeone;
 
 import com.google.gson.Gson;
+import io.javalin.Javalin;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -13,10 +14,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import java.io.File;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -29,12 +27,17 @@ public class HelloController {
 
     public String projectFolder;
 
+    public Gson gson = new Gson();
+
+    private Project activeProject;
+    public ArrayList<String> urls;
     public ArrayList<Project> projects = new ArrayList<>();
 
     @FXML
     public void initialize() throws IOException {
 
         segregateApps(captureRunningApps());
+        startServer();
     }
 
     @FXML
@@ -107,6 +110,7 @@ public class HelloController {
                 try {
 
                     resumeProject(projectObj);
+                    activeProject = projectObj;
 
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
@@ -145,7 +149,7 @@ public class HelloController {
         };
 
     }
-    //IDEA:Also add a CLI to start this thing
+    //TODO:IDEA:Also add a CLI to start this thing
 
     public HashSet<String> captureRunningApps() throws IOException {
         //runs tasklist, returns HashSet of running processes
@@ -219,13 +223,13 @@ public class HelloController {
         ArrayList<String> objUrls = new ArrayList<>();
 
         projects.add(projectObj);
-        System.out.println(projectObj.urls);
+        activeProject = projectObj;
+        System.out.println("urls: "+projectObj.urls);
 
         String dirPath = System.getenv("APPDATA") + "\\ResumeWork";
         new File(dirPath).mkdirs();
         String filePath = dirPath + "\\projects.json";
 
-        Gson gson = new Gson();
         String jsonObj = gson.toJson(projectObj);
 
         //TODO:adding multiple projects and fix the json formatting
@@ -271,6 +275,19 @@ public class HelloController {
             System.out.println("No folder chosen.");
         }
         return "NULL";
+    }
+    public void startServer(){
+        Javalin app = Javalin.create().start(8765);
+        app.post("/tabs", ctx -> {
+            System.out.println(ctx.body());
+            Map<String , ArrayList<String>> data = gson.fromJson(ctx.body(),Map.class);
+            urls = data.get("urls");
+            if (activeProject != null) {
+                activeProject.urls = new ArrayList<>(urls);
+                saveProject(activeProject);
+            }
+        });
+
     }
 
 }
