@@ -52,11 +52,15 @@ public class HelloController {
         grid.add(new Label("Project Name"),0,0);
         grid.add(nameField,1,0);
 
+        grid.add(new Label("Project Folder"),0,1);
+
         Button selectFolder = new Button();
         selectFolder.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight:bold;");
         selectFolder.setText("Select Folder");
         selectFolder.setOnAction(e -> {
             projectFolder = (openFolder(e));
+            selectFolder.setText(projectFolder);
+
 //            System.out.println(projectFolder);
                 });
 
